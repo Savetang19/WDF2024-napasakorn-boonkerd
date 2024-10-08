@@ -6,7 +6,21 @@
         <link rel="stylesheet" href="/css/output.css">
         <title>{{ title }}</title>
     </head>
-    <body>
-        {{{ body }}}
+    <body class="bg-champagne text-delft-blue h-screen flex flex-col">
+        <div class=" bg-champagne-light w-screen">
+            <div class="mx-10 py-5 flex flex-row font-primary">
+                <div class="w-full font-medium">
+                    <a href="/" class="pr-5 hover:text-delft-blue-light">Home</a>
+                    <a href="/songs" class="pr-5 hover:text-delft-blue-light">Songs</a>
+                    <a href="/your-reviews" class="pr-5 hover:text-delft-blue-light">Your Reviews</a>
+                    <a href="/about" class="pr-5 hover:text-delft-blue-light">About</a>
+                    <a href="/contact" class="hover:text-delft-blue-light">Contact</a>
+                </div>
+                <span class=" text-right w-full">Hi, Someone!</span>
+            </div>
+        </div>
+        <div class="flex-grow mx-10 py-5">
+            {{{ body }}}
+        </div>
     </body>
 </html>

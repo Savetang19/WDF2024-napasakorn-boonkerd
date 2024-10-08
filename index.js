@@ -26,6 +26,18 @@ app.get('/songs', (req, res) => {
     res.render('songs', {'title': 'Songs Page'})
 })
 
+app.get('/your-reviews', (req, res) => {
+    res.render('yourReview', {'title': 'Your Reviews Page'})
+})
+
+app.get('/about', (req, res) => {
+    res.render('about', {'title': 'About Page'})
+})
+
+app.get('/contact', (req, res) => {
+    res.render('contact', {'title': 'Contact Page'})
+})
+
 app.listen(port, function () {
     console.log(`Server up and running, listening on port ${port} -> http://localhost:${port}/`)
 })
