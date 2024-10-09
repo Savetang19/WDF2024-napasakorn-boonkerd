@@ -16,7 +16,11 @@
                     <a href="/about" class="pr-5 hover:text-delft-blue-light">About</a>
                     <a href="/contact" class="hover:text-delft-blue-light">Contact</a>
                 </div>
-                <span class=" text-right w-full">Hi, Someone!</span>
+                {{#if session.isLoggedIn}}
+                    <span>Hi, {{ session.username }}! - </span><a href="/logout" class="hover:text-delft-blue-light">Logout</a>
+                {{ else }}
+                    <a href="/login" class="hover:text-delft-blue-light">Login</a>
+                {{/if }}
             </div>
         </div>
         <div class="flex-grow mx-10 py-5">
