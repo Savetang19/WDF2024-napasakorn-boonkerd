@@ -55,6 +55,7 @@ app.use(function (req, res, next) {
 /* ------------------------- */
 
 app.use(express.static('public'))
+app.use(express.urlencoded({ extended: true }))
 
 app.get('/', (req, res) => {
     model = {
@@ -63,7 +64,6 @@ app.get('/', (req, res) => {
         isLoggedIn: req.session.isLoggedIn,
         username: req.session.username
     }
-    console.log(model)
     res.render('home', model)
 })
 
@@ -81,6 +81,58 @@ app.get('/about', (req, res) => {
 
 app.get('/contact', (req, res) => {
     res.render('contact', {'title': 'Contact Page'})
+})
+
+app.get('/login', (req, res) => {
+    res.render('login', {'title': 'Login Page'})
+})
+
+app.post('/login', (req, res) => {
+    // Get the username and password from the request
+    const username = req.body.username
+    const password = req.body.password
+
+    // Check if the username and password are correct
+    if (username == adminUsername) {
+        bcrypt.compare(password, adminPassword, (err, result) => {
+            if (err) {
+                console.log(`There was an error with login page: ${err}`)
+            }
+            if (result) {
+                // Set the session variables
+                req.session.isLoggedIn = true
+                req.session.isAdmin = true
+                req.session.username = username
+
+                // Redirect to the home page
+                res.redirect('/')
+            } else {
+                model = {
+                    'title': 'Login Page',
+                    error: 'Password is incorrect!'
+                }
+                // Render the login page with an error message
+                return res.status(400).render('login', model)
+            }
+        })
+    } else {
+        // Render the login page with an error message
+        model = {
+            'title': 'Login Page',
+            error: 'Username is incorrect!'
+        }
+        return res.status(400).render('login', model)
+    }
+})
+
+app.get('/logout', (req, res) => {
+    // Destroy the session
+    req.session.destroy( (err) => {
+        if (err) {
+            console.log('ERROR: ', err)
+        }
+        res.redirect('/')
+    })
 })
 
 app.listen(port, function () {

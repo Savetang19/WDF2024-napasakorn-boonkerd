@@ -14,11 +14,14 @@
                     <a href="/songs" class="pr-5 hover:text-delft-blue-light">Songs</a>
                     <a href="/your-reviews" class="pr-5 hover:text-delft-blue-light">Your Reviews</a>
                     <a href="/about" class="pr-5 hover:text-delft-blue-light">About</a>
-                    <a href="/contact" class="hover:text-delft-blue-light">Contact</a>
+                    <a href="/contact" class="pr-5 hover:text-delft-blue-light">Contact</a>
                 </div>
                 {{#if session.isLoggedIn}}
-                    <span>Hi, {{ session.username }}! - </span><a href="/logout" class="hover:text-delft-blue-light">Logout</a>
-                {{ else }}
+                    <div class="flex flex-row w-full justify-end">
+                        <p>Hi, {{ session.username }}!</p>
+                        <a href="/logout" class="hover:text-delft-blue-light pl-3">Logout</a>
+                    </div>
+                {{else}}
                     <a href="/login" class="hover:text-delft-blue-light">Login</a>
                 {{/if }}
             </div>
