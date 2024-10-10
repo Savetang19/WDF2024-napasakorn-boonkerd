@@ -95,13 +95,14 @@ function createSongsTable(db) {
         artist TEXT NOT NULL,
         album TEXT NOT NULL,
         genre TEXT NOT NULL,
-        release_year INTEGER NOT NULL
+        release_year INTEGER NOT NULL,
+        cover_url TEXT
     )`, (err) => {
         if (err) {
             console.log(`There was an error creating the songs table: ${err}`)
         } else {
             songs.forEach(song => {
-                db.run(`INSERT INTO songs (title, artist, album, genre, release_year) VALUES (?, ?, ?, ?, ?)`, [song.title, song.artist, song.album, song.genre, song.release_year], (err) => {
+                db.run(`INSERT INTO songs (title, artist, album, genre, release_year, cover_url) VALUES (?, ?, ?, ?, ?, ?)`, [song.title, song.artist, song.album, song.genre, song.release_year, song.cover_url], (err) => {
                     if (err) {
                         console.log(`There was an error inserting the song: ${err}`)
                     } else {
@@ -153,7 +154,52 @@ app.get('/', (req, res) => {
 })
 
 app.get('/songs', (req, res) => {
-    res.render('songs', { 'title': 'Songs Page' })
+    // Get the songs from the database
+    db.all(`SELECT * FROM songs`, (err, songs) => {
+        if (err) {
+            console.log(`There was an error getting the songs: ${err}`)
+        } else {
+            model = {
+                'title': 'Songs Page',
+                songs: songs
+            }
+            res.render('songs', model)
+        }
+    })
+})
+
+app.get('/song/:id', (req, res) => {
+    // Get the song from the database
+    db.get(`SELECT * FROM songs WHERE sid = ?`, [req.params.id], (err, song) => {
+        if (err) {
+            console.log(`There was an error getting the song: ${err}`)
+        }
+        console.log(song)
+        if (song) {
+            // Get reviews for the song
+            db.get(`SELECT username, rating, comment 
+                FROM reviews r 
+                INNER JOIN users u ON r.uid = u.uid
+                WHERE sid = ?`, [req.params.id], (err, reviews) => {
+                if (err) {
+                    console.log(`There was an error getting the reviews: ${err}`)
+                } else {
+                    model = {
+                        'title': 'Song Details Page',
+                        song: song,
+                        reviews: reviews
+                    }
+                    res.render('song', model)
+                }
+            })
+        } else {
+            model = {
+                'title': 'Opps!',
+                error: `Sorry, track id ${req.params.id} is not available!`
+            }
+            return res.status(400).render('error', model)
+        }
+    })
 })
 
 app.get('/your-reviews', (req, res) => {
@@ -177,37 +223,42 @@ app.post('/login', (req, res) => {
     const username = req.body.username
     const password = req.body.password
 
-    // Check if the username and password are correct
-    if (username == adminUsername) {
-        bcrypt.compare(password, adminPassword, (err, result) => {
-            if (err) {
-                console.log(`There was an error with login page: ${err}`)
-            }
-            if (result) {
-                // Set the session variables
-                req.session.isLoggedIn = true
-                req.session.isAdmin = true
-                req.session.username = username
-
-                // Redirect to the home page
-                res.redirect('/')
-            } else {
-                model = {
-                    'title': 'Login Page',
-                    error: 'Password is incorrect!'
-                }
-                // Render the login page with an error message
-                return res.status(400).render('login', model)
-            }
-        })
-    } else {
-        // Render the login page with an error message
-        model = {
-            'title': 'Login Page',
-            error: 'Username is incorrect!'
+    // Get the user from the database
+    db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
+        if (err) {
+            console.log(`There was an error with login page: ${err}`)
         }
-        return res.status(400).render('login', model)
-    }
+        if (user) {
+            bcrypt.compare(password, user.password, (err, result) => {
+                if (err) {
+                    console.log(`There was an error with login page: ${err}`)
+                }
+                if (result) {
+                    // Set the session variables
+                    req.session.isLoggedIn = true
+                    req.session.isAdmin = user.isAdmin
+                    req.session.username = username
+
+                    // Redirect to the home page
+                    res.redirect('/')
+                } else {
+                    model = {
+                        'title': 'Login Page',
+                        error: 'Password is incorrect!'
+                    }
+                    // Render the login page with an error message
+                    return res.status(400).render('login', model)
+                }
+            })
+        } else {
+            // Render the login page with an error message
+            model = {
+                'title': 'Login Page',
+                error: 'Username is incorrect!'
+            }
+            return res.status(400).render('login', model)
+        }
+    })
 })
 
 app.get('/logout', (req, res) => {
