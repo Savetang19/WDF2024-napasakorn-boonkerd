@@ -10,6 +10,8 @@ const bcrypt = require('bcrypt')
 const session = require('express-session')
 // load connect-sqlite3 into variable
 const connectSQLite3 = require('connect-sqlite3')
+// load data constants from constants.js
+const { users, songs, reviews } = require('./constants.js')
 
 // set the port
 const port = 8080
@@ -54,8 +56,91 @@ app.use(function (req, res, next) {
 })
 /* ------------------------- */
 
+// Serve static files
 app.use(express.static('public'))
+// Parse JSON and URL encoded data
 app.use(express.urlencoded({ extended: true }))
+
+/* Create functions to create tables */
+// Create the users table
+function createUsersTable(db) {
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+        uid INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        isAdmin BOOLEAN NOT NULL DEFAULT 0
+    )`, (err) => {
+        if (err) {
+            console.log(`There was an error creating the users table: ${err}`)
+        } else {
+            users.forEach(user => {
+                password = bcrypt.hashSync(user.password, saltRounds)
+                db.run(`INSERT INTO users (username, password, isAdmin) VALUES (?, ?, ?)`, [user.username, password, user.isAdmin], (err) => {
+                    if (err) {
+                        console.log(`There was an error inserting the user: ${err}`)
+                    } else {
+                        console.log(`User ${user.username} inserted successfully!`)
+                    }
+                })
+            });
+        }
+    })
+}
+
+// Create the songs table
+function createSongsTable(db) {
+    db.run(`CREATE TABLE IF NOT EXISTS songs (
+        sid INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        artist TEXT NOT NULL,
+        album TEXT NOT NULL,
+        genre TEXT NOT NULL,
+        release_year INTEGER NOT NULL
+    )`, (err) => {
+        if (err) {
+            console.log(`There was an error creating the songs table: ${err}`)
+        } else {
+            songs.forEach(song => {
+                db.run(`INSERT INTO songs (title, artist, album, genre, release_year) VALUES (?, ?, ?, ?, ?)`, [song.title, song.artist, song.album, song.genre, song.release_year], (err) => {
+                    if (err) {
+                        console.log(`There was an error inserting the song: ${err}`)
+                    } else {
+                        console.log(`Song ${song.title} inserted successfully!`)
+                    }
+                })
+            });
+        }
+    })
+}
+
+// Create the reviews table
+function createReviewsTable(db) {
+    db.run(`CREATE TABLE IF NOT EXISTS reviews (
+        rid INTEGER PRIMARY KEY AUTOINCREMENT,
+        sid INTEGER NOT NULL,
+        uid INTEGER NOT NULL,
+        rating INTEGER NOT NULL,
+        comment TEXT NOT NULL,
+        FOREIGN KEY(sid) REFERENCES songs(sid),
+        FOREIGN KEY(uid) REFERENCES users(uid)
+    )`, (err) => {
+        if (err) {
+            console.log(`There was an error creating the reviews table: ${err}`)
+        } else {
+            reviews.forEach(review => {
+                db.run(`INSERT INTO reviews (sid, uid, rating, comment) VALUES (?, ?, ?, ?)`, [review.sid, review.uid, review.rating, review.comment], (err) => {
+                    if (err) {
+                        console.log(`There was an error inserting the review: ${err}`)
+                    } else {
+                        console.log(`Review ${review.comment} inserted successfully!`)
+                    }
+                })
+            });
+        }
+    })
+}
+
+/* ---------------------------- */
 
 app.get('/', (req, res) => {
     model = {
@@ -68,23 +153,23 @@ app.get('/', (req, res) => {
 })
 
 app.get('/songs', (req, res) => {
-    res.render('songs', {'title': 'Songs Page'})
+    res.render('songs', { 'title': 'Songs Page' })
 })
 
 app.get('/your-reviews', (req, res) => {
-    res.render('yourReview', {'title': 'Your Reviews Page'})
+    res.render('yourReview', { 'title': 'Your Reviews Page' })
 })
 
 app.get('/about', (req, res) => {
-    res.render('about', {'title': 'About Page'})
+    res.render('about', { 'title': 'About Page' })
 })
 
 app.get('/contact', (req, res) => {
-    res.render('contact', {'title': 'Contact Page'})
+    res.render('contact', { 'title': 'Contact Page' })
 })
 
 app.get('/login', (req, res) => {
-    res.render('login', {'title': 'Login Page'})
+    res.render('login', { 'title': 'Login Page' })
 })
 
 app.post('/login', (req, res) => {
@@ -127,7 +212,7 @@ app.post('/login', (req, res) => {
 
 app.get('/logout', (req, res) => {
     // Destroy the session
-    req.session.destroy( (err) => {
+    req.session.destroy((err) => {
         if (err) {
             console.log('ERROR: ', err)
         }
@@ -136,5 +221,10 @@ app.get('/logout', (req, res) => {
 })
 
 app.listen(port, function () {
+    /* create tables */
+    // createUsersTable(db)
+    // createSongsTable(db)
+    // createReviewsTable(db)
+    /* ------------ */
     console.log(`Server up and running, listening on port ${port} -> http://localhost:${port}/`)
 })
