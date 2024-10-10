@@ -68,7 +68,7 @@ function createUsersTable(db) {
         uid INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL,
         password TEXT NOT NULL,
-        isAdmin BOOLEAN NOT NULL DEFAULT 0
+        isAdmin BOOLEAN NOT NULL DEFAULT FALSE
     )`, (err) => {
         if (err) {
             console.log(`There was an error creating the users table: ${err}`)
@@ -144,11 +144,13 @@ function createReviewsTable(db) {
 /* ---------------------------- */
 
 app.get('/', (req, res) => {
+    console.log(req.session)
     model = {
         'title': 'Home Page',
         isAdmin: req.session.isAdmin,
         isLoggedIn: req.session.isLoggedIn,
-        username: req.session.username
+        username: req.session.username,
+        uid: req.session.uid
     }
     res.render('home', model)
 })
@@ -168,42 +170,136 @@ app.get('/songs', (req, res) => {
     })
 })
 
-app.get('/song/:id', (req, res) => {
+app.get('/song/:sid', (req, res) => {
     // Get the song from the database
-    db.get(`SELECT * FROM songs WHERE sid = ?`, [req.params.id], (err, song) => {
+    db.get(`SELECT * FROM songs WHERE sid = ?`, [req.params.sid], (err, song) => {
         if (err) {
             console.log(`There was an error getting the song: ${err}`)
         }
-        console.log(song)
         if (song) {
             // Get reviews for the song
-            db.get(`SELECT username, rating, comment 
+            db.all(`SELECT username, rating, comment
                 FROM reviews r 
                 INNER JOIN users u ON r.uid = u.uid
-                WHERE sid = ?`, [req.params.id], (err, reviews) => {
+                WHERE r.sid = ?`, [req.params.sid], (err, reviews) => {
                 if (err) {
                     console.log(`There was an error getting the reviews: ${err}`)
                 } else {
-                    model = {
-                        'title': 'Song Details Page',
-                        song: song,
-                        reviews: reviews
-                    }
-                    res.render('song', model)
+                    db.get(`SELECT AVG(rating) as avg_rating FROM reviews WHERE sid = ?`, [req.params.sid], (err, avg_rating) => {
+                        model = {
+                            'title': 'Song Details Page',
+                            song: song,
+                            averageRating: avg_rating.avg_rating,
+                            reviews: reviews
+                        }
+                        res.render('song', model)
+                    })
                 }
             })
         } else {
             model = {
                 'title': 'Opps!',
-                error: `Sorry, track id ${req.params.id} is not available!`
+                error: `Sorry, track id ${req.params.sid} is not available!`
             }
             return res.status(400).render('error', model)
         }
     })
 })
 
+app.get('/song/review/:sid', (req, res) => {
+    // Get the song from the database
+    db.get(`SELECT * FROM songs WHERE sid = ?`, [req.params.sid], (err, song) => {
+        if (err) {
+            console.log(`There was an error getting the song: ${err}`)
+        }
+        if (song) {
+            model = {
+                'title': 'Write Review Page',
+                song: song
+            }
+            res.render('writeReview', model)
+        } else {
+            model = {
+                'title': 'Opps!',
+                error: `Sorry, track id ${req.params.sid} is not available!`
+            }
+            return res.status(400).render('error', model)
+        }
+    })
+})
+
+app.post('/song/review/:sid', (req, res) => {
+    // Get rating and comment from the request
+    const rating = req.body.rating
+    const comment = req.body.comment
+
+    // Insert the review into the database
+    db.run(`INSERT INTO reviews (sid, uid, rating, comment) VALUES (?, ?, ?, ?)`, [req.params.sid, req.session.uid, rating, comment], (err) => {
+        if (err) {
+            console.log(`There was an error inserting the review: ${err}`)
+        } else {
+            res.redirect(`/song/${req.params.id}`)
+        }
+    })
+})
+
 app.get('/your-reviews', (req, res) => {
-    res.render('yourReview', { 'title': 'Your Reviews Page' })
+    // Get the reviews for the user
+    db.all(`SELECT s.sid,r.rid, title, artist, cover_url, rating, comment
+        FROM reviews r
+        INNER JOIN songs s ON r.sid = s.sid
+        WHERE r.uid = ?`, [req.session.uid], (err, reviews) => {
+        if (err) {
+            console.log(`There was an error getting the reviews: ${err}`)
+        } else {
+            model = {
+                'title': 'Your Reviews Page',
+                reviews: reviews
+            }
+            res.render('yourReviews', model)
+        }
+    })
+})
+
+app.get('/song/review/edit/:rid', (req, res) => {
+    // Get the review from the data
+    db.get(`SELECT *
+        FROM reviews r
+        INNER JOIN songs s ON r.sid = s.sid 
+        WHERE rid = ?
+        AND r.uid = ?`, [req.params.rid, req.session.uid], (err, result) => {
+        if (err) {
+            console.log(`There was an error getting the review: ${err}`)
+        }
+        if (result) {
+            model = {
+                'title': 'Edit Review Page',
+                result: result
+            }
+            res.render('editReview', model)
+        } else {
+            model = {
+                'title': 'Opps!',
+                error: 'Review not found or you do not have permission to edit it!'
+            }
+            return res.status(400).render('error', model)
+        }
+    })
+})
+
+app.post('/song/review/edit/:rid', (req, res) => {
+    // Get rating and comment from the request
+    const rating = req.body.rating
+    const comment = req.body.comment
+
+    // Update the review in the database
+    db.run(`UPDATE reviews SET rating = ?, comment = ? WHERE rid = ?`, [rating, comment, req.params.rid], (err) => {
+        if (err) {
+            console.log(`There was an error updating the review: ${err}`)
+        } else {
+            res.redirect('/your-reviews')
+        }
+    })
 })
 
 app.get('/about', (req, res) => {
@@ -238,6 +334,7 @@ app.post('/login', (req, res) => {
                     req.session.isLoggedIn = true
                     req.session.isAdmin = user.isAdmin
                     req.session.username = username
+                    req.session.uid = user.uid
 
                     // Redirect to the home page
                     res.redirect('/')

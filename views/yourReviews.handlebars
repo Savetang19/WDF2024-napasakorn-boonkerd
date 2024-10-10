@@ -1,0 +1,16 @@
+<p class=" text-4xl py-5 font-primary">Let's find all of your review here!</p>
+<div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 justify-evenly gap-5">
+    {{#each reviews}}
+        <div class="bg-champagne-light rounded-lg flex flex-row p-5">
+            <img src="{{ cover_url }}" alt="" width="200px" height="200px">
+            <div class="w-full pl-5">
+                <p class="text-2xl font-medium font-primary">{{ title }}</p>
+                <p class="text-lg">{{ rating }}/5</p>
+                <p class="text-lg">Review: <br/>{{ comment }}</p>
+                <div class="flex flex-row p-2">
+                    <a href="/song/review/edit/{{ rid }}" class=" text-lg p-1 rounded text-center bg-delft-blue text-white hover:opacity-75">Modify</a>
+                </div>
+            </div>
+        </div>
+    {{/each}}
+</div>
