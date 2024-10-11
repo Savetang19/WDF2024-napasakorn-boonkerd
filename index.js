@@ -199,14 +199,27 @@ app.get('/song/:sid', (req, res) => {
         } else {
             model = {
                 'title': 'Opps!',
-                error: `Sorry, track id ${req.params.sid} is not available!`
+                error: `Sorry, track id ${req.params.sid} is not available!`,
+                message: 'Go to the songs page to see the available tracks.->',
+                link: '/songs'
             }
-            return res.status(400).render('error', model)
+            return res.status(404).render('error', model)
         }
     })
 })
 
 app.get('/song/review/:sid', (req, res) => {
+    // Check if the user is logged in
+    if (!req.session.isLoggedIn) {
+        model = {
+            'title': 'Opps!',
+            error: 'You need to be logged in to write a review!',
+            message: 'Go to the login page to login or create an account.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
     // Get the song from the database
     db.get(`SELECT * FROM songs WHERE sid = ?`, [req.params.sid], (err, song) => {
         if (err) {
@@ -221,9 +234,11 @@ app.get('/song/review/:sid', (req, res) => {
         } else {
             model = {
                 'title': 'Opps!',
-                error: `Sorry, track id ${req.params.sid} is not available!`
+                error: `Sorry, track id ${req.params.sid} is not available!`,
+                message: 'Go to the songs page to see the available tracks.->',
+                link: '/songs'
             }
-            return res.status(400).render('error', model)
+            return res.status(404).render('error', model)
         }
     })
 })
@@ -244,6 +259,17 @@ app.post('/song/review/:sid', (req, res) => {
 })
 
 app.get('/your-reviews', (req, res) => {
+    // Check if the user is logged in
+    if (!req.session.isLoggedIn) {
+        model = {
+            'title': 'Opps!',
+            error: 'You need to be logged in to see your review!',
+            message: 'Go to the login page to login or create an account.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
     // Get the reviews for the user
     db.all(`SELECT s.sid,r.rid, title, artist, cover_url, rating, comment
         FROM reviews r
@@ -262,6 +288,17 @@ app.get('/your-reviews', (req, res) => {
 })
 
 app.get('/song/review/edit/:rid', (req, res) => {
+    // Check if the user is logged in
+    if (!req.session.isLoggedIn) {
+        model = {
+            'title': 'Opps!',
+            error: 'You need to be logged in to edit a review!',
+            message: 'Go to the login page to login or create an account.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
     // Get the review from the data
     db.get(`SELECT *
         FROM reviews r
@@ -280,7 +317,9 @@ app.get('/song/review/edit/:rid', (req, res) => {
         } else {
             model = {
                 'title': 'Opps!',
-                error: 'Review not found or you do not have permission to edit it!'
+                error: 'Review not found or you do not have permission to edit it!',
+                message: 'Go to your reviews page to see your reviews.->',
+                link: '/your-reviews'
             }
             return res.status(400).render('error', model)
         }
@@ -298,6 +337,44 @@ app.post('/song/review/edit/:rid', (req, res) => {
             console.log(`There was an error updating the review: ${err}`)
         } else {
             res.redirect('/your-reviews')
+        }
+    })
+})
+
+app.get('/song/review/delete/:rid', (req, res) => {
+    // Check if the user is logged in
+    if (!req.session.isLoggedIn) {
+        model = {
+            'title': 'Opps!',
+            error: 'You need to be logged in to delete a review!',
+            message: 'Go to the login page to login or create an account.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
+    // Check if the review exists
+    db.get(`SELECT * FROM reviews WHERE rid = ?`, [req.params.rid], (err, result) => {
+        if (err) {
+            console.log(`There was an error getting the review: ${err}`)
+        }
+        if (result) {
+            // Delete the review
+            db.run(`DELETE FROM reviews WHERE rid = ?`, [req.params.rid], (err) => {
+                if (err) {
+                    console.log(`There was an error deleting the review: ${err}`)
+                } else {
+                    res.redirect('/your-reviews')
+                }
+            })
+        } else {
+            model = {
+                'title': 'Opps!',
+                error: 'Review not found or you do not have permission to delete it!',
+                message: 'Go to your reviews page to see your reviews.->',
+                link: '/your-reviews'
+            }
+            return res.status(400).render('error', model)
         }
     })
 })
