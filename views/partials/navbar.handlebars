@@ -5,11 +5,14 @@
         <a href="/your-reviews" class="pr-5 hover:text-delft-blue-light">Your Reviews</a>
         <a href="/about" class="pr-5 hover:text-delft-blue-light">About</a>
         <a href="/contact" class="pr-5 hover:text-delft-blue-light">Contact</a>
+        {{#if session.isAdmin}}
+        <a href="/admin" class="pr-5 hover:text-delft-blue-light">-- Admin Page --</a>
+        {{/if}}
     </div>
     {{#if session.isLoggedIn}}
     <div class="flex flex-row w-full justify-end">
         <p>Hi, {{ session.username }}!</p>
-        <a href="/logout" class="hover:text-delft-blue-light pl-3">Logout</a>
+        <a href="/logout" class="text-redwood pl-3">Logout</a>
     </div>
     {{else}}
     <a href="/login" class="hover:text-delft-blue-light">Login</a>

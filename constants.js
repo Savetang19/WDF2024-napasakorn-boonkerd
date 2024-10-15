@@ -3,7 +3,8 @@ const users = [
     { 'uid': 2, 'username': 'JaneSoCool', 'password': 'Jane2024', 'isAdmin': false },
     { 'uid': 3, 'username': 'SamanthaBozo', 'password': 'S3cr3tp4ssw0rd', 'isAdmin': false },
     { 'uid': 4, 'username': 'JeromeL', 'password': 'J3r0m3L', 'isAdmin': true },
-    { 'uid': 5, 'username': 'Sxvetxng', 'password': 'Sxve2502', 'isAdmin': true }
+    { 'uid': 5, 'username': 'Sxvetxng', 'password': 'Sxve2502', 'isAdmin': true },
+    { 'uid': 6, 'username': 'admin', 'password': 'admin', 'isAdmin': true }
 ]
 
 const songs = [
@@ -19,6 +20,9 @@ const songs = [
     { 'sid': 10, 'title': 'Godzilla', 'artist': 'Eminem', 'album': 'Music to Be Murdered By', 'genre': 'Hip Hop', 'release_year': 2020, 'cover_url': '/img/godzilla.png' },
     { 'sid': 11, 'title': 'Throne', 'artist': 'Bring Me The Horizon', 'album': `That's the Spirit`, 'genre': 'Rock', 'release_year': 2015, 'cover_url': '/img/throne.png' },
     { 'sid': 12, 'title': 'Teardrops', 'artist': 'Bring Me The Horizon', 'album': 'Post Human: Survival Horror', 'genre': 'Rock', 'release_year': 2020, 'cover_url': '/img/teardrops.png' },
+    { 'sid': 13, 'title': 'Unholy', 'artist': 'Sam Smith & Kim Petras', 'album': 'Unholy', 'genre': 'Pop', 'release_year': 2022, 'cover_url': '/img/unholy.png' },
+    { 'sid': 14, 'title': 'ฉันไม่ต้องการตัวเธอในตอนนี้', 'artist': 'Little John', 'album': 'ฉันไม่ต้องการตัวเธอในตอนนี้', 'genre': 'Pop', 'release_year': 2024, 'cover_url': '/img/thai-song-1.png' },
+    { 'sid': 15, 'title': 'Dance for your life', 'artist': 'LHAM', 'album': 'Dance for your life', 'genre': 'Indie', 'release_year': 2024, 'cover_url': '/img/thai-song-2.png' }
 ]
 
 const reviews = [
@@ -27,7 +31,7 @@ const reviews = [
     { 'rid': 3, 'sid': 3, 'uid': 3, 'rating': 4, 'comment': 'Let there be rock!' },
     { 'rid': 4, 'sid': 5, 'uid': 4, 'rating': 5, 'comment': 'This is a classic!' },
     { 'rid': 5, 'sid': 8, 'uid': 5, 'rating': 5, 'comment': 'Bro use his skin to breathe!' },
-    { 'rid': 6, 'sid': 1, 'uid': 5, 'rating': 5, 'comment': 'Golden ears unlocked!' },
+    { 'rid': 6, 'sid': 1, 'uid': 5, 'rating': 5, 'comment': 'Golden ears unlocked!' }
 ]
 
 module.exports = { users, songs, reviews }

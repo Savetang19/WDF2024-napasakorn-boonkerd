@@ -83,7 +83,7 @@ function createUsersTable(db) {
                         console.log(`User ${user.username} inserted successfully!`)
                     }
                 })
-            });
+            })
         }
     })
 }
@@ -110,7 +110,7 @@ function createSongsTable(db) {
                         console.log(`Song ${song.title} inserted successfully!`)
                     }
                 })
-            });
+            })
         }
     })
 }
@@ -137,7 +137,7 @@ function createReviewsTable(db) {
                         console.log(`Review ${review.comment} inserted successfully!`)
                     }
                 })
-            });
+            })
         }
     })
 }
@@ -157,9 +157,10 @@ app.get('/', (req, res) => {
 
 app.get('/home', (req, res) => {
     // Get all reviews from the database
-    db.all(`SELECT s.sid, r.rid, title, artist, cover_url, rating, comment
+    db.all(`SELECT s.sid, r.rid, username, title, artist, cover_url, rating, comment
         FROM reviews r
-        INNER JOIN songs s ON r.sid = s.sid`, (err, reviews) => {
+        INNER JOIN songs s ON r.sid = s.sid
+        INNER JOIN users u ON r.uid = u.uid`, (err, reviews) => {
         if (err) {
             console.log(`There was an error getting all the reviews: ${err}`)
         } else {
@@ -435,14 +436,118 @@ app.get('/contact', (req, res) => {
     res.render('contact', { 'title': 'Contact Page' })
 })
 
+app.get('/admin', (req, res) => {
+    // Check if the user is admin
+    if (!req.session.isAdmin) {
+        model = {
+            'title': 'Opps!',
+            error: 'You need to be an admin to access this page!',
+            message: 'Go to the login page to login as an admin.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
+    // Get all users from the database
+    db.all(`SELECT * FROM users`, (err, users) => {
+        if (err) {
+            console.log(`There was an error getting all the users: ${err}`)
+        } else {
+            model = {
+                'title': 'Admin Page',
+                users: users
+            }
+            res.render('admin', model)
+        }
+    })
+})
+
+app.post('/admin/update', (req, res) => {
+    // Check if the user is admin
+    if (!req.session.isAdmin) {
+        const model = {
+            title: 'Oops!',
+            error: 'You need to be an admin to access this page!',
+            message: 'Go to the login page to login as an admin.->',
+            link: '/login'
+        };
+        return res.status(400).render('error', model);
+    }
+
+    // Get the updated user data from the form (req.body.users)
+    const updatedUsers = req.body.users || {};
+
+    // Fetch all users from the database
+    db.all(`SELECT uid FROM users`, (err, users) => {
+        if (err) {
+            console.error(`There was an error getting all the users: ${err}`);
+            return res.status(500).send('Server error');
+        }
+
+        // Loop through each user and update their admin status
+        users.forEach(user => {
+            const userData = updatedUsers[user.uid] || {}; // Get the user data from the form
+            const isAdmin = userData.isAdmin ? 1 : 0; // If checked, set to 1, else 0
+
+            // Update the user's admin status in the database
+            db.run(`UPDATE users SET isAdmin = ? WHERE uid = ?`, [isAdmin, user.uid], (err) => {
+                if (err) {
+                    console.error(`Error updating user ${user.uid}:`, err);
+                }
+            });
+        });
+
+        // Redirect back to the admin page after updating
+        res.redirect('/admin');
+    });
+});
+
+
+app.get('/admin/delete/:uid', (req, res) => {
+    // Check if the user is admin
+    if (!req.session.isAdmin) {
+        model = {
+            'title': 'Opps!',
+            error: 'You need to be an admin to access this page!',
+            message: 'Go to the login page to login as an admin.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
+    // Check if the user exists
+    db.get(`SELECT * FROM users WHERE uid = ?`, [req.params.uid], (err, user) => {
+        if (err) {
+            console.log(`There was an error getting the user: ${err}`)
+        }
+        if (user) {
+            // Delete the user
+            db.run(`DELETE FROM users WHERE uid = ?`, [req.params.uid], (err) => {
+                if (err) {
+                    console.log(`There was an error deleting the user: ${err}`)
+                } else {
+                    res.redirect('/admin')
+                }
+            })
+        } else {
+            model = {
+                'title': 'Opps!',
+                error: 'User not found or you do not have permission to delete it!',
+                message: 'Go to the admin page to see the available users.->',
+                link: '/admin'
+            }
+            return res.status(400).render('error', model)
+        }
+    })
+})
+
 app.get('/login', (req, res) => {
     res.render('login', { 'title': 'Login Page' })
 })
 
 app.post('/login', (req, res) => {
     // Get the username and password from the request
-    const username = req.body.username
-    const password = req.body.password
+    const { username, password } = req.body
 
     // Get the user from the database
     db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
@@ -492,6 +597,55 @@ app.get('/logout', (req, res) => {
         res.redirect('/')
     })
 })
+
+app.get('/register', (req, res) => {
+    res.render('register', { 'title': 'Sign Up Page' })
+})
+
+app.post('/register', (req, res) => {
+    const { username, password, confirm_password } = req.body
+
+    // Check if the username is already taken
+    db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
+        if (err) {
+            console.log(`There was an error with register page: ${err}`)
+        }
+
+        if (user) {
+            return res.render('register', { 
+                error: 'Username is already taken!' 
+            })
+        }
+
+        // Proceed only if the username is available
+        // Check if passwords match
+        if (password !== confirm_password) {
+            return res.render('register', { 
+                error: 'Passwords do not match!' 
+            })
+        }
+
+        // Hash the password and store the user in the database
+        const hashedPassword = bcrypt.hashSync(password, 10)
+
+        // Insert the new user into the database
+        db.run(`INSERT INTO users (username, password) VALUES (?, ?)`, 
+            [username, hashedPassword], 
+            (err) => {
+                if (err) {
+                    console.error(`Error inserting user: ${err}`)
+                    return res.render('register', { 
+                        error: 'Error creating account. Please try again.' 
+                    })
+                }
+
+                // Redirect the user to login after successful registration
+                res.redirect('/login')
+            }
+        )
+    })
+})
+
 
 app.listen(port, function () {
     /* create tables */
