@@ -1,5 +1,19 @@
-<div class="flex flex-col w-full h-full justify-center items-center font-primary">
-    <p class="text-5xl">Welcome to TrackTalk!</p>
-    <p class="text-3xl mt-5">A music review website for all music lover</p>
-    <p class="text-2xl mt-10 hover:text-delft-blue-light"><a href="/songs">Let's find your favourite track! -></a></p>
+{{#if reviews.length }}
+<p class=" text-4xl pb-5 font-primary">Let's see what's people talk about the track!</p>
+<div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 justify-evenly gap-5">
+    {{#each reviews}}
+    <div class="bg-champagne-light rounded-lg lg:flex lg:flex-row p-5">
+        <div class="flex justify-center">
+            <img src="{{ cover_url }}" alt="" width="200px" height="200px">
+        </div>
+        <div class="w-full pl-5">
+            <p class="text-2xl font-medium font-primary">{{ title }}</p>
+            <p class="text-lg">{{ rating }}/5</p>
+            <p class="text-lg">Review: <br />{{ comment }}</p>
+        </div>
+    </div>
+    {{/each}}
 </div>
+{{else}}
+<p class=" text-4xl py-5 font-primary">Sorry, there are no any review.</p>
+{{/if}}

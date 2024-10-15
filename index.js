@@ -12,6 +12,7 @@ const session = require('express-session')
 const connectSQLite3 = require('connect-sqlite3')
 // load data constants from constants.js
 const { users, songs, reviews } = require('./constants.js')
+const { type } = require('express/lib/response.js')
 
 // set the port
 const port = 8080
@@ -144,28 +145,75 @@ function createReviewsTable(db) {
 /* ---------------------------- */
 
 app.get('/', (req, res) => {
-    console.log(req.session)
     model = {
-        'title': 'Home Page',
+        'title': 'Get Ready!',
         isAdmin: req.session.isAdmin,
         isLoggedIn: req.session.isLoggedIn,
         username: req.session.username,
         uid: req.session.uid
     }
-    res.render('home', model)
+    res.render('landing', model)
+})
+
+app.get('/home', (req, res) => {
+    // Get all reviews from the database
+    db.all(`SELECT s.sid, r.rid, title, artist, cover_url, rating, comment
+        FROM reviews r
+        INNER JOIN songs s ON r.sid = s.sid`, (err, reviews) => {
+        if (err) {
+            console.log(`There was an error getting all the reviews: ${err}`)
+        } else {
+            model = {
+                'title': 'Home page',
+                reviews: reviews
+            }
+            res.render('home', model)
+        }
+    })
 })
 
 app.get('/songs', (req, res) => {
-    // Get the songs from the database
-    db.all(`SELECT * FROM songs`, (err, songs) => {
+    // Create pagination
+    const page = req.query.page ? req.query.page : 1 // Set the defualt to 1
+    const limit = 4 // Show 4 songs per page
+    const offset = (page - 1) * limit // Calculate the offset
+    const nextPage = parseInt(page) + 1 // Calculate the next page number
+    const prevPage = parseInt(page) - 1 // Calculate the previous page
+
+    // First, count the total number of songs
+    db.get(`SELECT COUNT(*) AS count FROM songs`, (err, result) => {
         if (err) {
-            console.log(`There was an error getting the songs: ${err}`)
+            console.log(`There was an error counting the number of songs: ${err}`)
         } else {
-            model = {
-                'title': 'Songs Page',
-                songs: songs
+            const totalSongs = result.count
+            const totalPages = Math.ceil(totalSongs / limit)
+            if (page > totalPages || page < 1) {
+                const model = {
+                    title: 'Oops!',
+                    error: `Page ${page} does not exist!`,
+                    message: 'Go back to the available songs page.->',
+                    link: '/songs'
+                }
+                return res.status(400).render('error', model)
             }
-            res.render('songs', model)
+
+            // Get the songs for the current page
+            db.all(`SELECT * FROM songs LIMIT ? OFFSET ?`, [limit, offset], (err, songs) => {
+                if (err) {
+                    console.log(`There was an error getting the songs: ${err}`)
+                } else {
+                    const model = {
+                        title: 'Songs Page',
+                        songs: songs,
+                        page: page,
+                        nextPage: page < totalPages ? nextPage : null, // Check if it has next page to go or not
+                        prevPage: page > 1 ? prevPage : null, // Check if it has previous page or not
+                        lastPage: totalPages
+                    }
+                    // console.log(model)
+                    res.render('songs', model)
+                }
+            })
         }
     })
 })
@@ -253,7 +301,7 @@ app.post('/song/review/:sid', (req, res) => {
         if (err) {
             console.log(`There was an error inserting the review: ${err}`)
         } else {
-            res.redirect(`/song/${req.params.id}`)
+            res.redirect(`/songs`)
         }
     })
 })

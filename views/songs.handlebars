@@ -1,20 +1,32 @@
-<p class=" text-4xl py-5 font-primary">Let's find your favourite track here!</p>
+<p class=" text-4xl pb-5 font-primary">Let's find your favourite track here!</p>
 <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 justify-evenly gap-5">
     {{#each songs}}
-        <div class="bg-champagne-light rounded-lg lg:flex lg:flex-row p-5">
-            <div class="flex justify-center">
-                <img src="{{ cover_url }}" alt="" width="200px" height="200px">
-            </div>
-            <div class="w-full pl-5">
-                <p class="text-2xl font-medium font-primary">{{ title }}</p>
-                <p class="text-lg">Release year: {{ release_year }}</p>
-                <p class="text-lg">Genre: {{ genre }}</p>
-                <p class="text-lg">Artist: {{ artist }}</p>
-                <p class="text-lg">Album: {{ album }}</p>
-                <div class=" flex justify-center pt-3">
-                    <a href="/song/{{ sid }}" class=" text-lg p-1 rounded text-center bg-delft-blue text-white hover:opacity-75">Click here to see reviews</a>
-                </div>
+    <div class="bg-champagne-light rounded-lg lg:flex lg:flex-row p-5">
+        <div class="flex justify-center">
+            <img src="{{ cover_url }}" alt="" width="200px" height="200px">
+        </div>
+        <div class="w-full pl-5">
+            <p class="text-2xl font-medium font-primary">{{ title }}</p>
+            <p class="text-lg">Release year: {{ release_year }}</p>
+            <p class="text-lg">Genre: {{ genre }}</p>
+            <p class="text-lg">Artist: {{ artist }}</p>
+            <p class="text-lg">Album: {{ album }}</p>
+            <div class=" flex justify-center pt-3">
+                <a href="/song/{{ sid }}"
+                    class=" text-lg p-1 rounded text-center bg-delft-blue text-white hover:opacity-75">Click here to see
+                    reviews</a>
             </div>
         </div>
+    </div>
     {{/each}}
+</div>
+<!-- Pagination Controls -->
+<div class="flex justify-end mt-3">
+    {{#if prevPage}}
+    <a href="/songs?page={{prevPage}}"><</a>
+    {{/if}}
+    <span class="mx-5">{{page}}/{{lastPage}}</span>
+    {{#if nextPage}}
+    <a href="/songs?page={{nextPage}}">></a>
+    {{/if}}
 </div>
