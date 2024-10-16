@@ -1,23 +1,52 @@
-<p class="text-3xl pb-5 font-primary">Admin Dashboard</p>
-<table class="border-collapse border border-delft-blue border-spacing-1">
-    <thead>
-        <tr>
-            <th class="border-collapse border border-delft-blue p-2">User</th>
-            <th class="border-collapse border border-delft-blue p-2">Admin Status</th>
-            <th class="border-collapse border border-delft-blue p-2">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {{#each users}}
-        <tr>
-            <td class="border-collapse border border-delft-blue p-3">{{username}}</td>
-            <td class="border-collapse border border-delft-blue p-3">
-                {{#if isAdmin}} <span class="text-viridian">Yes</span> {{else}} <span class="text-redwood">No</span> {{/if}}
-            </td>
-            <td class="border-collapse border border-delft-blue p-3">
-                <a href="/admin/update/{{uid}}" class="text-lg p-1 bg-champagne-light rounded hover:bg-viridian hover:text-white">Modify</a>
-            </td>
-        </tr>
-        {{/each}}
-    </tbody>
-</table>
+<p class="text-3xl font-primary">Admin Dashboard</p>
+<div class="my-5">
+    <h1 class="text-xl text-viridian font-bold mb-2">Users Management</h1>
+    <table class="border-collapse border border-delft-blue border-spacing-1">
+        <thead>
+            <tr>
+                <th class="border-collapse border border-delft-blue p-2">User</th>
+                <th class="border-collapse border border-delft-blue p-2">Admin Status</th>
+                <th class="border-collapse border border-delft-blue p-2">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each users}}
+            <tr>
+                <td class="border-collapse border border-delft-blue p-3">{{username}}</td>
+                <td class="border-collapse border border-delft-blue p-3">
+                    {{#if isAdmin}} <span class="text-viridian">Yes</span> {{else}} <span class="text-redwood">No</span>
+                    {{/if}}
+                </td>
+                <td class="border-collapse border border-delft-blue p-3">
+                    <a href="/admin/user/edit/{{uid}}"
+                        class="text-lg p-1 bg-champagne-light rounded hover:bg-viridian hover:text-white">Modify</a>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+<div>
+    <h1 class="text-xl text-viridian font-bold mb-2">Songs Management</h1>
+    <table class="border-collapse border border-delft-blue border-spacing-1">
+        <thead>
+            <tr>
+                <th class="border-collapse border border-delft-blue p-2">Title</th>
+                <th class="border-collapse border border-delft-blue p-2">Artist</th>
+                <th class="border-collapse border border-delft-blue p-2">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each songs}}
+            <tr>
+                <td class="border-collapse border border-delft-blue p-3">{{title}}</td>
+                <td class="border-collapse border border-delft-blue p-3">{{artist}}</td>
+                <td class="border-collapse border border-delft-blue p-3">
+                    <a href="/admin/song/edit/{{sid}}"
+                        class="text-lg p-1 bg-champagne-light rounded hover:bg-viridian hover:text-white">Modify</a>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

@@ -453,16 +453,23 @@ app.get('/admin', (req, res) => {
         if (err) {
             console.log(`There was an error getting all the users: ${err}`)
         } else {
-            model = {
-                'title': 'Admin Page',
-                users: users
-            }
-            res.render('admin', model)
+            db.all(`SELECT * FROM songs`, (err, songs) => {
+                if (err) {
+                    console.log(`There was an error getting all the songs: ${err}`)
+                } else {
+                    model = {
+                        'title': 'Admin Page',
+                        users: users,
+                        songs: songs
+                    }
+                    res.render('admin', model)
+                }
+            })
         }
     })
 })
 
-app.get('/admin/update/:uid', (req, res) => {
+app.get('/admin/user/edit/:uid', (req, res) => {
     // Check if the user is admin
     if (!req.session.isAdmin) {
         model = {
@@ -488,7 +495,7 @@ app.get('/admin/update/:uid', (req, res) => {
         } else {
             model = {
                 'title': 'Opps!',
-                error: 'User not found or you do not have permission to update it!',
+                error: 'User not found or you do not have permission to edit it!',
                 message: 'Go to the admin page to see the available users.->',
                 link: '/admin'
             }
@@ -497,7 +504,7 @@ app.get('/admin/update/:uid', (req, res) => {
     })
 })
 
-app.post('/admin/update/:uid', (req, res) => {
+app.post('/admin/user/edit/:uid', (req, res) => {
     // Check if the user is admin
     if (!req.session.isAdmin) {
         const model = {
@@ -517,7 +524,7 @@ app.post('/admin/update/:uid', (req, res) => {
         if (user) {
             const username = req.body.username
             const isAdmin = req.body.changePermission ? true : false
-            
+
             // Update the user in the database
             db.run(`UPDATE users SET username=?, isAdmin = ? WHERE uid = ?`, [username, isAdmin, req.params.uid], (err) => {
                 if (err) {
@@ -529,7 +536,7 @@ app.post('/admin/update/:uid', (req, res) => {
         } else {
             model = {
                 'title': 'Opps!',
-                error: 'User not found or you do not have permission to update it!',
+                error: 'User not found or you do not have permission to edit it!',
                 message: 'Go to the admin page to see the available users.->',
                 link: '/admin'
             }
@@ -539,7 +546,7 @@ app.post('/admin/update/:uid', (req, res) => {
 })
 
 
-app.get('/admin/delete/:uid', (req, res) => {
+app.get('/admin/user/delete/:uid', (req, res) => {
     // Check if the user is admin
     if (!req.session.isAdmin) {
         model = {
@@ -577,6 +584,83 @@ app.get('/admin/delete/:uid', (req, res) => {
     })
 })
 
+app.get('/admin/song/edit/:sid', (req, res) => {
+    // Check if the user is admin
+    if (!req.session.isAdmin) {
+        model = {
+            'title': 'Opps!',
+            error: 'You need to be an admin to access this page!',
+            message: 'Go to the login page to login as an admin.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
+    // Get the song from the database
+    db.get(`SELECT * FROM songs WHERE sid = ?`, [req.params.sid], (err, song) => {
+        if (err) {
+            console.log(`There was an error getting the song: ${err}`)
+        }
+        if (song) {
+            model = {
+                'title': 'Update Song Page',
+                song: song
+            }
+            res.render('editSong', model)
+        } else {
+            model = {
+                'title': 'Opps!',
+                error: 'Song not found or you do not have permission to edit it!',
+                message: 'Go to the admin page to see the available songs.->',
+                link: '/admin'
+            }
+            return res.status(400).render('error', model)
+        }
+    })
+})
+
+app.post('/admin/song/edit/:sid', (req, res) => {
+    // Check if the user is admin
+    if (!req.session.isAdmin) {
+        const model = {
+            title: 'Oops!',
+            error: 'You need to be an admin to access this page!',
+            message: 'Go to the login page to login as an admin.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
+    // Get the song from the database
+    db.get(`SELECT * FROM songs WHERE sid = ?`, [req.params.sid], (err, song) => {
+        if (err) {
+            console.log(`There was an error getting the song: ${err}`)
+        }
+        if (song) {
+            const artist = req.body.artist
+            const album = req.body.album
+            const genre = req.body.genre
+            const release_year = req.body.release_year
+
+            // Update the song in the database
+            db.run(`UPDATE songs SET artist=?, album=?, genre=?, release_year=? WHERE sid = ?`, [artist, album, genre, release_year, req.params.sid], (err) => {
+                if (err) {
+                    console.log(`There was an error updating the song: ${err}`)
+                } else {
+                    res.redirect('/admin')
+                }
+            })
+        } else {
+            model = {
+                'title': 'Opps!',
+                error: 'Song not found or you do not have permission to edit it!',
+                message: 'Go to the admin page to see the available songs.->',
+                link: '/admin'
+            }
+            return res.status(400).render('error', model)
+        }
+    })
+})
 app.get('/login', (req, res) => {
     res.render('login', { 'title': 'Login Page' })
 })
