@@ -1,20 +1,23 @@
-<nav class="py-5 mx-5 lg:mx-10 xl:mx-20 flex flex-row font-primary">
+<nav class="py-5 mx-5 md:mx-10 xl:mx-20 flex flex-col md:flex-row font-primary">
     <div class="w-full font-medium">
-        <a href="/home" class="pr-5 hover:text-delft-blue-light">Home</a>
-        <a href="/songs" class="pr-5 hover:text-delft-blue-light">Songs</a>
-        <a href="/your-reviews" class="pr-5 hover:text-delft-blue-light">Your Reviews</a>
-        <a href="/about" class="pr-5 hover:text-delft-blue-light">About</a>
-        <a href="/contact" class="pr-5 hover:text-delft-blue-light">Contact</a>
-        {{#if session.isAdmin}}
-        <a href="/admin" class="pr-5 hover:text-delft-blue-light">-- Admin Page --</a>
-        {{/if}}
+        <ul class="flex flex-col md:flex-row md:space-x-5">
+            <li class="py-2 md:py-0"><a href="/home" class="hover:text-delft-blue-light">Home</a></li>
+            <li class="py-2 md:py-0"><a href="/songs" class="hover:text-delft-blue-light">Songs</a></li>
+            <li class="py-2 md:py-0"><a href="/your-reviews" class="hover:text-delft-blue-light">Your Reviews</a></li>
+            <li class="py-2 md:py-0"><a href="/about" class="hover:text-delft-blue-light">About</a></li>
+            <li class="py-2 md:py-0"><a href="/contact" class="hover:text-delft-blue-light">Contact</a></li>
+            {{#if session.isAdmin}}
+            <li class="py-2 md:py-0"><a href="/admin" class="hover:text-delft-blue-light">-- Admin Page --</a></li>
+            {{/if}}
+        </ul>
     </div>
+    
     {{#if session.isLoggedIn}}
-    <div class="flex flex-row w-full justify-end">
-        <p>Hi, {{ session.username }}!</p>
-        <a href="/logout" class="text-redwood pl-3">Logout</a>
+    <div class="flex flex-col md:flex-row w-full md:justify-end">
+        <p class="py-2 md:py-0">Hi, {{ session.username }}!</p>
+        <a href="/logout" class="text-redwood pl-0 md:pl-3">Logout</a>
     </div>
     {{else}}
-    <a href="/login" class="hover:text-delft-blue-light">Login</a>
-    {{/if }}
+    <a href="/login" class="hover:text-delft-blue-light py-2 md:py-0">Login</a>
+    {{/if}}
 </nav>
