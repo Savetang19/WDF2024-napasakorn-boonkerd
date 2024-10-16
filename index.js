@@ -661,6 +661,45 @@ app.post('/admin/song/edit/:sid', (req, res) => {
         }
     })
 })
+
+app.get('/admin/song/delete/:sid', (req, res) => {
+    // Check if the user is admin
+    if (!req.session.isAdmin) {
+        const model = {
+            title: 'Oops!',
+            error: 'You need to be an admin to access this page!',
+            message: 'Go to the login page to login as an admin.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
+    // Check if the song exists
+    db.get(`SELECT * FROM songs WHERE sid = ?`, [req.params.sid], (err, song) => {
+        if (err) {
+            console.log(`There was an error getting the song: ${err}`)
+        }
+        if (song) {
+            // Delete the song
+            db.run(`DELETE FROM songs WHERE sid = ?`, [req.params.sid], (err) => {
+                if (err) {
+                    console.log(`There was an error deleting the song: ${err}`)
+                } else {
+                    res.redirect('/admin')
+                }
+            })
+        } else {
+            model = {
+                'title': 'Opps!',
+                error: 'Song not found or you do not have permission to delete it!',
+                message: 'Go to the admin page to see the available songs.->',
+                link: '/admin'
+            }
+            return res.status(400).render('error', model)
+        }
+    })
+})
+
 app.get('/login', (req, res) => {
     res.render('login', { 'title': 'Login Page' })
 })
