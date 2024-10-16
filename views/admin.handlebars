@@ -1,35 +1,23 @@
 <p class="text-3xl pb-5 font-primary">Admin Dashboard</p>
-<form action="/admin/update" method="post">
-    <table class="border-collapse border border-delft-blue border-spacing-1">
-        <thead>
-            <tr>
-                <th class="border-collapse border border-delft-blue p-2">User</th>
-                <th class="border-collapse border border-delft-blue p-2">Admin Status</th>
-                <th class="border-collapse border border-delft-blue p-2">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each users}}
-            <tr>
-                <td class="border-collapse border border-delft-blue p-3">{{username}}</td>
-                
-                <td class="border-collapse border border-delft-blue p-3">
-                    <!-- Hidden input to submit user ID -->
-                    <input type="hidden" name="users[{{uid}}][id]" value="{{uid}}">
-                    
-                    <!-- Checkbox for isAdmin status -->
-                    <input type="checkbox" name="users[{{uid}}][isAdmin]" {{#if isAdmin}}checked{{/if}}>
-                </td>
-                
-                <td class="border-collapse border border-delft-blue p-3">
-                    <a href="/admin/delete/{{uid}}"
-                        class=" text-lg p-1 rounded text-center bg-redwood text-white hover:opacity-75">Delete</a>
-                </td>
-            </tr>
-            {{/each}}
-        </tbody>
-    </table>
-    <div class="w-fit mt-3 p-1 rounded text-center bg-delft-blue text-white hover:opacity-75">
-        <button type="submit">Save</button>
-    </div>
-</form>
+<table class="border-collapse border border-delft-blue border-spacing-1">
+    <thead>
+        <tr>
+            <th class="border-collapse border border-delft-blue p-2">User</th>
+            <th class="border-collapse border border-delft-blue p-2">Admin Status</th>
+            <th class="border-collapse border border-delft-blue p-2">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each users}}
+        <tr>
+            <td class="border-collapse border border-delft-blue p-3">{{username}}</td>
+            <td class="border-collapse border border-delft-blue p-3">
+                {{#if isAdmin}} <span class="text-viridian">Yes</span> {{else}} <span class="text-redwood">No</span> {{/if}}
+            </td>
+            <td class="border-collapse border border-delft-blue p-3">
+                <a href="/admin/update/{{uid}}" class="text-lg p-1 bg-champagne-light rounded hover:bg-viridian hover:text-white">Modify</a>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

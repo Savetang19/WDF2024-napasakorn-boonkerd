@@ -462,7 +462,42 @@ app.get('/admin', (req, res) => {
     })
 })
 
-app.post('/admin/update', (req, res) => {
+app.get('/admin/update/:uid', (req, res) => {
+    // Check if the user is admin
+    if (!req.session.isAdmin) {
+        model = {
+            'title': 'Opps!',
+            error: 'You need to be an admin to access this page!',
+            message: 'Go to the login page to login as an admin.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
+    // Get the user from the database
+    db.get(`SELECT * FROM users WHERE uid = ?`, [req.params.uid], (err, user) => {
+        if (err) {
+            console.log(`There was an error getting the user: ${err}`)
+        }
+        if (user) {
+            model = {
+                'title': 'Update User Page',
+                user: user
+            }
+            res.render('editUser', model)
+        } else {
+            model = {
+                'title': 'Opps!',
+                error: 'User not found or you do not have permission to update it!',
+                message: 'Go to the admin page to see the available users.->',
+                link: '/admin'
+            }
+            return res.status(400).render('error', model)
+        }
+    })
+})
+
+app.post('/admin/update/:uid', (req, res) => {
     // Check if the user is admin
     if (!req.session.isAdmin) {
         const model = {
@@ -470,37 +505,38 @@ app.post('/admin/update', (req, res) => {
             error: 'You need to be an admin to access this page!',
             message: 'Go to the login page to login as an admin.->',
             link: '/login'
-        };
-        return res.status(400).render('error', model);
+        }
+        return res.status(400).render('error', model)
     }
 
-    // Get the updated user data from the form (req.body.users)
-    const updatedUsers = req.body.users || {};
-
-    // Fetch all users from the database
-    db.all(`SELECT uid FROM users`, (err, users) => {
+    // Get the user from the database
+    db.get(`SELECT * FROM users WHERE uid = ?`, [req.params.uid], (err, user) => {
         if (err) {
-            console.error(`There was an error getting all the users: ${err}`);
-            return res.status(500).send('Server error');
+            console.log(`There was an error getting the user: ${err}`)
         }
-
-        // Loop through each user and update their admin status
-        users.forEach(user => {
-            const userData = updatedUsers[user.uid] || {}; // Get the user data from the form
-            const isAdmin = userData.isAdmin ? 1 : 0; // If checked, set to 1, else 0
-
-            // Update the user's admin status in the database
-            db.run(`UPDATE users SET isAdmin = ? WHERE uid = ?`, [isAdmin, user.uid], (err) => {
+        if (user) {
+            const username = req.body.username
+            const isAdmin = req.body.changePermission ? true : false
+            
+            // Update the user in the database
+            db.run(`UPDATE users SET username=?, isAdmin = ? WHERE uid = ?`, [username, isAdmin, req.params.uid], (err) => {
                 if (err) {
-                    console.error(`Error updating user ${user.uid}:`, err);
+                    console.log(`There was an error updating the user: ${err}`)
+                } else {
+                    res.redirect('/admin')
                 }
-            });
-        });
-
-        // Redirect back to the admin page after updating
-        res.redirect('/admin');
-    });
-});
+            })
+        } else {
+            model = {
+                'title': 'Opps!',
+                error: 'User not found or you do not have permission to update it!',
+                message: 'Go to the admin page to see the available users.->',
+                link: '/admin'
+            }
+            return res.status(400).render('error', model)
+        }
+    })
+})
 
 
 app.get('/admin/delete/:uid', (req, res) => {
