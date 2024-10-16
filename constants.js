@@ -21,7 +21,7 @@ const songs = [
     { 'sid': 11, 'title': 'Throne', 'artist': 'Bring Me The Horizon', 'album': `That's the Spirit`, 'genre': 'Rock', 'release_year': 2015, 'cover_url': '/img/throne.png' },
     { 'sid': 12, 'title': 'Teardrops', 'artist': 'Bring Me The Horizon', 'album': 'Post Human: Survival Horror', 'genre': 'Rock', 'release_year': 2020, 'cover_url': '/img/teardrops.png' },
     { 'sid': 13, 'title': 'Unholy', 'artist': 'Sam Smith & Kim Petras', 'album': 'Unholy', 'genre': 'Pop', 'release_year': 2022, 'cover_url': '/img/unholy.png' },
-    { 'sid': 14, 'title': 'ฉันไม่ต้องการตัวเธอในตอนนี้', 'artist': 'Little John', 'album': 'ฉันไม่ต้องการตัวเธอในตอนนี้', 'genre': 'Pop', 'release_year': 2024, 'cover_url': '/img/thai-song-1.png' },
+    { 'sid': 14, 'title': 'ฉันไม่ต้องการตัวเธอในตอนนี้', 'artist': 'Little John', 'album': 'ฉันไม่ต้องการตัวเธอในตอนนี้', 'genre': 'Rock', 'release_year': 2024, 'cover_url': '/img/thai-song-1.png' },
     { 'sid': 15, 'title': 'Dance for your life', 'artist': 'LHAM', 'album': 'Dance for your life', 'genre': 'Indie', 'release_year': 2024, 'cover_url': '/img/thai-song-2.png' }
 ]
 

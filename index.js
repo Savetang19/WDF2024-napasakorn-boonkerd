@@ -700,6 +700,51 @@ app.get('/admin/song/delete/:sid', (req, res) => {
     })
 })
 
+app.get('/admin/song/add', (req, res) => {
+    // Check if the user is admin
+    if (!req.session.isAdmin) {
+        const model = {
+            title: 'Oops!',
+            error: 'You need to be an admin to access this page!',
+            message: 'Go to the login page to login as an admin.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
+    res.render('addSong', { 'title': 'Add Song Page' })
+})
+
+app.post('/admin/song/add', (req, res) => {
+    // Check if the user is admin
+    if (!req.session.isAdmin) {
+        const model = {
+            title: 'Oops!',
+            error: 'You need to be an admin to access this page!',
+            message: 'Go to the login page to login as an admin.->',
+            link: '/login'
+        }
+        return res.status(400).render('error', model)
+    }
+
+    // Get the song details from the request
+    const title = req.body.title
+    const artist = req.body.artist
+    const album = req.body.album
+    const genre = req.body.genre
+    const release_year = req.body.release_year
+    const cover_url = req.body.cover_url
+
+    // Insert the song into the database
+    db.run(`INSERT INTO songs (title, artist, album, genre, release_year, cover_url) VALUES (?, ?, ?, ?, ?, ?)`, [title, artist, album, genre, release_year, cover_url], (err) => {
+        if (err) {
+            console.log(`There was an error inserting the song: ${err}`)
+        } else {
+            res.redirect('/admin')
+        }
+    })
+})
+
 app.get('/login', (req, res) => {
     res.render('login', { 'title': 'Login Page' })
 })

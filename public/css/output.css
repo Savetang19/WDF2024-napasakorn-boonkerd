@@ -693,6 +693,46 @@ video {
   width: 200px;
 }
 
+.w-\[\] {
+  width: ;
+}
+
+.w-\[70\] {
+  width: 70;
+}
+
+.w-svw {
+  width: 100svw;
+}
+
+.w-lvw {
+  width: 100lvw;
+}
+
+.w-\[lvw\] {
+  width: lvw;
+}
+
+.w-\[70lvw\] {
+  width: 70lvw;
+}
+
+.w-\[50lvw\] {
+  width: 50lvw;
+}
+
+.w-\[30lvw\] {
+  width: 30lvw;
+}
+
+.w-\[45lvw\] {
+  width: 45lvw;
+}
+
+.w-\[40lvw\] {
+  width: 40lvw;
+}
+
 .flex-grow {
   flex-grow: 1;
 }
