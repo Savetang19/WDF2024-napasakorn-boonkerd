@@ -816,16 +816,16 @@ app.post('/register', (req, res) => {
         }
 
         if (user) {
-            return res.render('register', { 
-                error: 'Username is already taken!' 
+            return res.render('register', {
+                error: 'Username is already taken!'
             })
         }
 
         // Proceed only if the username is available
         // Check if passwords match
         if (password !== confirm_password) {
-            return res.render('register', { 
-                error: 'Passwords do not match!' 
+            return res.render('register', {
+                error: 'Passwords do not match!'
             })
         }
 
@@ -833,13 +833,13 @@ app.post('/register', (req, res) => {
         const hashedPassword = bcrypt.hashSync(password, 10)
 
         // Insert the new user into the database
-        db.run(`INSERT INTO users (username, password) VALUES (?, ?)`, 
-            [username, hashedPassword], 
+        db.run(`INSERT INTO users (username, password) VALUES (?, ?)`,
+            [username, hashedPassword],
             (err) => {
                 if (err) {
                     console.error(`Error inserting user: ${err}`)
-                    return res.render('register', { 
-                        error: 'Error creating account. Please try again.' 
+                    return res.render('register', {
+                        error: 'Error creating account. Please try again.'
                     })
                 }
 

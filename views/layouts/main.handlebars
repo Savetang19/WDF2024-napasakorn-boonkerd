@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="/css/output.css">
-        <title>{{ title }}</title>
-    </head>
-    <body class="bg-champagne text-delft-blue h-screen flex flex-col">
-        <div class=" bg-champagne-light w-screen">
-            {{> navbar }}
-        </div>
-        <div class="flex-grow py-10 mx-5 lg:mx-10 xl:mx-20">
-            {{{ body }}}
-        </div>
-    </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/output.css">
+    <title>{{ title }}</title>
+</head>
+
+<body class="bg-champagne text-delft-blue h-screen flex flex-col">
+    <div class=" bg-champagne-light w-screen">
+        {{> navbar }}
+    </div>
+    <div class="flex-grow py-10 mx-5 lg:mx-10 xl:mx-20">
+        {{{ body }}}
+    </div>
+</body>
+
 </html>
